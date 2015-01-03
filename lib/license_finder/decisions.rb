@@ -42,6 +42,7 @@ module LicenseFinder
 
     def initialize
       @decisions = []
+      @configuration = {}
       @packages = Set.new
       @licenses = Hash.new { |h, k| h[k] = Set.new }
       @approvals = {}
@@ -134,6 +135,32 @@ module LicenseFinder
       self
     end
 
+    def load_attributes(configuration = {})
+      @configuration = configuration
+      configuration = configuration.deep_symbolize_keys
+      if configuration
+
+        @whitelisted = Set.new(configuration[:whitelist].keys.map{|license| License.find_by_name(license.to_s)}) if configuration.key?(:whitelist)
+        @ignored = Set.new(configuration[:ignore_dependencies].keys.map(&:to_s)) if configuration.key?(:ignore_dependencies)
+        @ignored_groups = Set.new(configuration[:ignore_groups].keys.map(&:to_s)) if configuration.key?(:ignore_groups)
+        @project_name = configuration[:project_name] if configuration.key?(:project_name)
+
+        configuration[:whitelist].each do |license, value|
+          next unless value.key? :include
+          value[:include].each do |package, _txn|
+            @licenses[package.to_s] << License.find_by_name(license.to_s)
+          end
+        end if configuration.key?(:whitelist)
+
+        @approvals = configuration[:approvals].reduce({}) do |memo, (k, v)|
+          memo.tap { |m| m[k.to_s] = TXN.from_hash(v) }
+        end if configuration.key?(:approvals)
+
+      end
+
+      self
+    end
+
     #########
     # PERSIST
     #########
@@ -149,15 +176,13 @@ module LicenseFinder
     def self.restore(persisted)
       result = new
       if persisted
-        YAML.load(persisted).each do |action, *args|
-          result.send(action, *args)
-        end
+        result.load_attributes(YAML.load(persisted))
       end
       result
     end
 
     def persist
-      YAML.dump(@decisions)
+      YAML.dump(@configuration)
     end
 
     def self.read!(file)
@@ -170,5 +195,19 @@ module LicenseFinder
         f.print value
       end
     end
+  end
+end
+
+class Object
+  def deep_symbolize_keys
+    return self.reduce({}) do |memo, (k, v)|
+      memo.tap { |m| m[k.to_sym] = v.deep_symbolize_keys }
+    end if self.is_a? Hash
+
+    return self.reduce([]) do |memo, v|
+      memo << v.deep_symbolize_keys; memo
+    end if self.is_a? Array
+
+    self
   end
 end

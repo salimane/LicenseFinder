@@ -6,11 +6,12 @@ module LicenseFinder
       def self.auditable
         method_option :who, desc: "The person making this decision"
         method_option :why, desc: "The reason for making this decision"
+        method_option :when, desc: "The time the decision was made"
       end
 
       no_commands do
         def decisions
-          @decisions ||= Decisions.saved!(config.decisions_file)
+          @decisions ||= Decisions.saved!(config.config_file)
         end
       end
 
@@ -45,4 +46,3 @@ module LicenseFinder
     end
   end
 end
-

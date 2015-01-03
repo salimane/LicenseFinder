@@ -5,3 +5,4 @@ Gemfile.lock
 .gradle/
 tmp/
 .pairs
+node_modules/
