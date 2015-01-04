@@ -36,7 +36,7 @@ module LicenseFinder
 
     TXN = Struct.new(:who, :why, :safe_when) do
       def self.from_hash(txn)
-        new(txn[:who], txn[:why], txn[:when])
+        new(txn[:who], txn[:why], (txn[:when] && Time.parse(txn[:when]).getutc) || Time.now.getutc)
       end
     end
 

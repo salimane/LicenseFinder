@@ -1,34 +1,29 @@
 module LicenseFinder
   class Configuration
-    def self.with_optional_saved_config(primary_config, project_path = Pathname.new('.'))
-      config_file = project_path.join('config', 'license_finder.yml')
-      saved_config = config_file.exist? ? YAML.load(config_file.read) : {}
-      saved_config = {} unless saved_config
-      new(primary_config, saved_config)
+    def self.with_optional_flags(flags, project_path = Pathname.new('.'))
+      new(flags, project_path)
     end
 
-    def initialize(primary_config, saved_config)
-      @primary_config = primary_config
-      @saved_config = saved_config
+    def initialize(flags, project_path)
+      @config_file = project_path.join('config', 'license_finder.yml')
+      configuration = config_file.exist? ? YAML.load(config_file.read) : {}
+      configuration = {} unless configuration
+      @flags = flags
+      @configuration = configuration
     end
 
     def gradle_command
       get(:gradle_command) || "gradle"
     end
 
-    def decisions_file
-      file_name = get(:decisions_file) || "doc/dependency_decisions.yml"
-      Pathname(file_name)
-    end
-
     def config_file
-      Pathname.new('.').join('config', 'license_finder.yml')
+      @config_file
     end
 
     private
 
     def get(key)
-      @primary_config[key.to_sym] || @saved_config[key.to_s]
+      @flags[key.to_sym] || @configuration[key.to_s]
     end
   end
 end

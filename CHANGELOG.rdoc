@@ -1,3 +1,16 @@
+=== 3.0.0 / unreleased
+
+* Features
+
+  * one configuration file `config/license_finder.yml`
+  (deprecation of `doc/dependency_decisions.yml`)
+  * configuration file structure overhaul
+  * deprecation of command line subcommands `approvals`, `approvals`,
+  `dependencies`, `ignored_dependencies`, `ignored_groups`, `licenses`,
+  `project_name`, `whitelist`. Edit directly the config file
+
+* Bugfixes
+
 === 2.0.0 / unreleased
 
 * Features
@@ -130,7 +143,7 @@
 * Features
 
   * Projects now have a title which can be configured from CLI
-  * JRuby officially supported. Test suite works against jruby, removed 
+  * JRuby officially supported. Test suite works against jruby, removed
     warnings
   * Internal clean-up of database behavior
   * Updated documentation with breakdown of HTML report
