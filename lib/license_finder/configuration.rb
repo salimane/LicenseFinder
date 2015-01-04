@@ -5,25 +5,45 @@ module LicenseFinder
     end
 
     def initialize(flags, project_path)
-      @config_file = project_path.join('config', 'license_finder.yml')
-      configuration = config_file.exist? ? YAML.load(config_file.read) : {}
-      configuration = {} unless configuration
       @flags = flags
-      @configuration = configuration
+      @file = file
+      init
+      @configuration = YAML.load(file.read) || {}
     end
 
     def gradle_command
       get(:gradle_command) || "gradle"
     end
 
-    def config_file
-      @config_file
+    def file
+      @file || file_dir.join('license_finder.yml')
+    end
+
+    def init
+      init! unless inited?
     end
 
     private
 
     def get(key)
       @flags[key.to_sym] || @configuration[key.to_s]
+    end
+
+    def inited?
+      file.exist?
+    end
+
+    def init!
+      file_dir.mkpath
+      FileUtils.cp(file_template, file)
+    end
+
+    def file_dir
+      Pathname.new('.').join('config')
+    end
+
+    def file_template
+      ROOT_PATH.join('data', 'license_finder.example.yml')
     end
   end
 end

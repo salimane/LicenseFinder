@@ -10,7 +10,7 @@ module LicenseFinder
 
       no_commands do
         def decisions
-          @decisions ||= Decisions.saved!(config.config_file)
+          @decisions ||= Decisions.saved!(config.file)
         end
       end
 

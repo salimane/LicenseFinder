@@ -36,6 +36,7 @@ module LicenseFinder
 
     TXN = Struct.new(:who, :why, :safe_when) do
       def self.from_hash(txn)
+        txn ||= {}
         new(txn[:who], txn[:why], (txn[:when] && Time.parse(txn[:when]).getutc) || Time.now.getutc)
       end
     end
@@ -140,21 +141,21 @@ module LicenseFinder
       configuration = configuration.deep_symbolize_keys
       if configuration
 
-        @whitelisted = Set.new(configuration[:whitelist].keys.map{|license| License.find_by_name(license.to_s)}) if configuration.key?(:whitelist)
-        @ignored = Set.new(configuration[:ignore_dependencies].keys.map(&:to_s)) if configuration.key?(:ignore_dependencies)
-        @ignored_groups = Set.new(configuration[:ignore_groups].keys.map(&:to_s)) if configuration.key?(:ignore_groups)
-        @project_name = configuration[:project_name] if configuration.key?(:project_name)
+        @whitelisted = Set.new(configuration[:whitelist].keys.map{|license| License.find_by_name(license.to_s)}) if configuration[:whitelist]
+        @ignored = Set.new(configuration[:ignore_dependencies].keys.map(&:to_s)) if configuration[:ignore_dependencies]
+        @ignored_groups = Set.new(configuration[:ignore_groups].keys.map(&:to_s)) if configuration[:ignore_groups]
+        @project_name = configuration[:project_name] if configuration[:project_name]
 
         configuration[:whitelist].each do |license, value|
-          next unless value.key? :include
+          next unless value && value[:include]
           value[:include].each do |package, _txn|
             @licenses[package.to_s] << License.find_by_name(license.to_s)
           end
-        end if configuration.key?(:whitelist)
+        end if configuration[:whitelist]
 
         @approvals = configuration[:approvals].reduce({}) do |memo, (k, v)|
           memo.tap { |m| m[k.to_s] = TXN.from_hash(v) }
-        end if configuration.key?(:approvals)
+        end if configuration[:approvals]
 
       end
 

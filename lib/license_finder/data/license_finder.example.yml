@@ -1,0 +1,27 @@
+default_approval: &default_approval
+  who: 'WHO'
+  why: 'REASON'
+  when: 2015-01-01
+
+project_name: # project name
+gradle_command: # only meaningful if used with a Java/gradle project. Defaults to "gradle".
+whitelist:
+  # 'BSD':
+  #   <<: *default_approval
+  # 'MIT':
+  #   <<: *default_approval
+  #   include:
+  #     rake:
+  #       <<: *default_approval
+approvals:
+  # rb-fchange:
+  #   who: 'ANOTHER_WHO'
+  #   why: 'ANOTHER_REASON'
+  #   when: 2015-01-01
+ignore_groups:
+  # development:
+  #   <<: *default_approval
+ignore_dependencies:
+  # xpath:
+  #   <<: *default_approval
+  #   when: 2015-01-02
